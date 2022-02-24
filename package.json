@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "redis": "^3.1.2",
+    "redis": "^4.0.4",
     "ws": "^8.5.0"
   },
   "type": "module"
