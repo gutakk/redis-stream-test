@@ -3,7 +3,7 @@
 ## How to run websocket
 
 ### Server
-```js
+```
 node websocket-server.js
 ```
 
