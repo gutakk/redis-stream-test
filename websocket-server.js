@@ -1,12 +1,16 @@
 import { createClient, commandOptions } from 'redis';
-import { WebSocketServer } from 'ws';
+import { Server } from 'socket.io';
+import http from 'http';
 
-const wss = new WebSocketServer({ port: 8080 })
-const client = createClient({url: "redis://localhost:46379/0"});
-await client.connect();
+const server = http.createServer();
+const io = new Server(server);
+io.listen(3000);
+
+const redisClient = createClient({url: "redis://localhost:46379/0"});
+await redisClient.connect();
 
 try {
-  await client.xGroupCreate('test-stream', 'myconsumergroup', '0', {
+  await redisClient.xGroupCreate('test-stream', 'myconsumergroup', '0', {
     MKSTREAM: true
   });
   console.log('Created consumer group.');
@@ -14,25 +18,44 @@ try {
   console.log('Consumer group already exists, skipped creation.');
 }
 
+io.on('connection', async (socket) => {
+  console.log(`socket ${socket.id} has been connected`);
 
-wss.on('connection', async (ws) => {
-  let breakLoop = false;
-  ws.on('close', () => {
-    console.log('disconnected');
-    breakLoop = true;
+  socket.on('disconnect', reason => {
+    console.log(`socket ${socket.id} has been disconnected:`, reason);
   });
 
-  while (true) {
-    if (breakLoop) return;
+  socket.on('x', async (data) => {
+    if(data) {
+      const ids = data.map((v) => v.id);
+      const ackResult = await redisClient.xAck('test-stream', 'myconsumergroup', ids)
+      console.log('Acknowledge result:', ackResult);
+    }
 
     const result = await consume('test-stream');
-    ws.send(result);
-  }
+    if (result) {
+      console.log('\nEmit data to socket');
+      socket.emit('stream', result)
+    } else {
+      while (true) {
+        const result = await consume('test-stream');
+        if (result) {
+          console.log('\nEmit data to socket');
+          socket.emit('stream', result);
+          break;
+        }
+      }
+    }
+  });
+
+  const result = await consume('test-stream');
+  console.log('\nEmit data to socket');
+  socket.emit('stream', result);
 });
 
 async function consume(streamName) {
   try {
-    let response = await client.xReadGroup(
+    let response = await redisClient.xReadGroup(
       commandOptions({
         isolated: true
       }),
@@ -47,10 +70,10 @@ async function consume(streamName) {
     );
 
     if (response) {
-      return JSON.stringify(response);
+      return response;
     } else {
       console.log('No data in Redis stream');
-      return null;
+      return null
     }
   } catch (err) {
     console.error(err);

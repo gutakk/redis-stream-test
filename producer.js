@@ -13,9 +13,9 @@ function getRandom (list) {
   const rand = ['A', 'B', 'C'];
 
   setInterval(async () => {
-    for (let i=1; i<=100; i++) {
+    for (let i=1; i<=20; i++) {
       const data = {
-        id: i,
+        playerId: i,
         type: getRandom(rand)
       };
       await client.xAdd('test-stream', '*', data);
