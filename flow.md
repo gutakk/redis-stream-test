@@ -19,7 +19,9 @@ sequenceDiagram
   end
 
   alt Data does not exist
-    Note over W,R: Retry "Read from Redis stream" step every x seconds
+    loop every x seconds
+      Note over W,R: Retry "Read from Redis stream" step
+    end
   else
     W->>S: Data (batch)
     S->>S: Process and batch update studio db
