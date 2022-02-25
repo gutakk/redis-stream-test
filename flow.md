@@ -6,13 +6,13 @@ sequenceDiagram
   participant W as Websocket
   Participant R as Redis Stream
 
-  rect rgb(0, 0, 0)
+  rect rgba(0, 0, 0, 0.2)
     Note over S,W: Do only once
     S->>W: Handshaking
     W->>S: Handshaked
   end
 
-  rect rgb(0, 0, 0)
+  rect rgba(0, 0, 0, 0.2)
     Note over W,R: Read from Redis stream
     W->>R: XREAD (batch)
     R->>W: Data (batch)
