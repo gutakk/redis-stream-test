@@ -14,17 +14,23 @@ try {
   console.log('Consumer group already exists, skipped creation.');
 }
 
-wss.on('connection', (ws) => {
-  ws.on('message', async (data) => {
-    const jsonParams = JSON.parse(data);
-    const result = await consume(jsonParams.streamName);
-    ws.send(result);
+
+wss.on('connection', async (ws) => {
+  let breakLoop = false;
+  ws.on('close', () => {
+    console.log('disconnected');
+    breakLoop = true;
   });
 
-  ws.send('connected to websocket server');
+  while (true) {
+    if (breakLoop) return;
+
+    const result = await consume('test-stream');
+    ws.send(result);
+  }
 });
 
-async function consume(streamName, id) {
+async function consume(streamName) {
   try {
     let response = await client.xReadGroup(
       commandOptions({
@@ -35,7 +41,7 @@ async function consume(streamName, id) {
         key: streamName,
         id: '>' // Next entry ID that no consumer in this group has read
       }], {
-        COUNT: 1,
+        COUNT: 10,
         BLOCK: 5000
       }
     );
@@ -43,6 +49,7 @@ async function consume(streamName, id) {
     if (response) {
       return JSON.stringify(response);
     } else {
+      console.log('No data in Redis stream');
       return null;
     }
   } catch (err) {
