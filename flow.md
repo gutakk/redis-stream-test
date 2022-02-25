@@ -1,9 +1,9 @@
 ```mermaid
 sequenceDiagram
-  title: Redis stream with websocket happy flow
+  title: Redis stream with Websocket flow
 
-  participant S as Studio
-  participant W as Websocket
+  participant S as Studio (new service)
+  participant W as Websocket (consumer)
   Participant R as Redis Stream
 
   rect rgba(0, 0, 0, 0.2)
