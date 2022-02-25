@@ -21,6 +21,7 @@ sequenceDiagram
   alt Data does not exist
     loop every x seconds
       Note over W,R: Continue "Read from Redis stream"
+      Note over W,R: Stop this loop once terminate the connection
     end
   else
     W->>S: Data (batch)
