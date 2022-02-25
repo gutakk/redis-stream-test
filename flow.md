@@ -20,7 +20,7 @@ sequenceDiagram
 
   alt Data does not exist
     loop every x seconds
-      Note over W,R: Retry "Read from Redis stream" step
+      Note over W,R: Continue "Read from Redis stream"
     end
   else
     W->>S: Data (batch)
