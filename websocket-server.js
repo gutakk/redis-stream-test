@@ -4,7 +4,7 @@ import http from 'http';
 
 const server = http.createServer();
 const io = new Server(server);
-io.listen(3000);
+server.listen(3000);
 
 const redisClient = createClient({url: "redis://localhost:46379/0"});
 await redisClient.connect();
@@ -18,14 +18,17 @@ try {
   console.log('Consumer group already exists, skipped creation.');
 }
 
+
 io.on('connection', async (socket) => {
+  let breakWhile = false;
   console.log(`socket ${socket.id} has been connected`);
 
   socket.on('disconnect', reason => {
     console.log(`socket ${socket.id} has been disconnected:`, reason);
+    breakWhile = true;
   });
 
-  socket.on('x', async (data) => {
+  socket.on('acknowledge socket', async (data) => {
     if(data) {
       const ids = data.map((v) => v.id);
       const ackResult = await redisClient.xAck('test-stream', 'myconsumergroup', ids)
@@ -38,6 +41,7 @@ io.on('connection', async (socket) => {
       socket.emit('stream', result)
     } else {
       while (true) {
+        if (breakWhile) break;
         const result = await consume('test-stream');
         if (result) {
           console.log('\nEmit data to socket');
