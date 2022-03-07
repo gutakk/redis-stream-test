@@ -7,7 +7,7 @@ sequenceDiagram
   Participant SC as SCAPI
 
   S->>W: Handshaking (passing SCREENCLOUD_API_TOKEN)
-  W->>SC: POST: validate/token (Header: SCREENCLOUD_API_TOKEN)
+  W->>SC: POST: /_internal/app/verify (Header: SCREENCLOUD_API_TOKEN)
   SC->>W: Validation result
   alt Validation result is success
     W->>S: Handshaked
