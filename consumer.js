@@ -21,7 +21,7 @@ socket.on("connect_error", (err) => {
 socket.on('synchronize', (data) => {
   if (!data) {
     console.log('no data');
-    socket.emit('acknowledge', data);
+    socket.emit('acknowledge', null);
     return;
   }
 
@@ -29,7 +29,7 @@ socket.on('synchronize', (data) => {
 
   sleep(100).then(() => {
     const ids = data[0].messages.map((v) => v.id);
-    console.log('acknowledege data');
+    console.log('acknowledge data');s
     socket.emit('acknowledge', ids)
   });
 });
