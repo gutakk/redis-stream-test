@@ -33,4 +33,5 @@ import { createClient } from 'redis';
 
 
   console.log('added');
+  process.exit(0);
 })();
