@@ -26,7 +26,7 @@ import { createClient } from 'redis';
   await Promise.all(ids.map((id) => client.xAdd('screen-status-event-stream', '*', {
     event_name: 'PLAYER_CONNECTION_STATE',
     player_ids: `["${id}"]`,
-    connection_state: 'offline',
+    connection_state: 'online',
     connected_at: new Date().toString(),
     disconnected_at: null,
   })))
